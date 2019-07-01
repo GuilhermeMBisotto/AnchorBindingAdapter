@@ -2,6 +2,7 @@ package com.guilhermembisotto.anchor
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 enum class ViewAnchors {
     ANCHOR_TOP, ANCHOR_BOTTOM, ANCHOR_LEFT, ANCHOR_RIGHT
@@ -16,6 +17,48 @@ fun processAnchors(
     view: View,
     anchors: List<ViewAnchorModel>
 ) {
+    if (view is RecyclerView) {
+        processPadding(view, anchors)
+    } else {
+        processMargin(view, anchors)
+    }
+}
+
+private fun processPadding(
+    view: View,
+    anchors: List<ViewAnchorModel>
+) {
+    var left = view.paddingLeft
+    var top = view.paddingTop
+    var right = view.paddingRight
+    var bottom = view.paddingBottom
+
+    anchors.forEach {
+        when (it.edgeToAnchor) {
+            ViewAnchors.ANCHOR_LEFT -> {
+                left = it.anchor.right
+            }
+            ViewAnchors.ANCHOR_TOP -> {
+                top = it.anchor.bottom
+            }
+            ViewAnchors.ANCHOR_RIGHT -> {
+                right = it.anchor.left
+            }
+            ViewAnchors.ANCHOR_BOTTOM -> {
+                bottom = it.anchor.top
+            }
+        }
+    }
+
+    view.setPadding(left, top, right, bottom)
+    view.requestLayout()
+}
+
+private fun processMargin(
+    view: View,
+    anchors: List<ViewAnchorModel>
+) {
+
     val layoutParams =
         view.layoutParams as ViewGroup.MarginLayoutParams
 
@@ -40,6 +83,7 @@ fun processAnchors(
             }
         }
     }
+
     setMargins(
         view,
         layoutParams,
